@@ -25,7 +25,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
             text-align: center; 
             min-width: 320px; 
-            max-width: 400px; 
+            max-width: 420px; 
             position: relative;
             z-index: 2;
         }
@@ -73,6 +73,25 @@
         .custom-input:focus {
             border-color: #ff6b81;
         }
+
+        /* Responsive YouTube Container */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -90,7 +109,7 @@
         </div>
     </div>
 
-    <!-- Page 1: Do you like me? (ปุ่ม No ยังขยับหนีอยู่) -->
+    <!-- Page 1: Do you like me? -->
     <div id="page-1" class="card hidden">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
@@ -110,14 +129,29 @@
         </div>
     </div>
 
-    <!-- Page 3: Will you be my girlfriend? (ปุ่ม No นิ่งๆ ไม่หนี) -->
+    <!-- Page 3: Will you be my girlfriend? -->
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
         <p>Website by Fluke</p>
         <div class="btn-group">
             <button id="p3-yes" class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
-            <button id="p3-no" class="btn-no" onclick="answerPage3('No', 'redirect')">No</button>
+            <button id="p3-no" class="btn-no" onclick="answerPage3('No', 'player')">No</button>
+        </div>
+    </div>
+
+    <!-- Page Music Player: หน้านี้จะฉายคลิป YouTube บนการ์ด -->
+    <div id="page-player" class="card hidden">
+        <h2 style="color: #ff6b81; margin-top: 0;">Please listen to this song 🎵</h2>
+        
+        <div class="video-container">
+            <!-- รหัสไอดีวิดีโอ YouTube จะถูกนำมาใส่ตรงนี้ -->
+            <iframe id="yt-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <div class="btn-group" style="margin-top: 1rem;">
+            <button class="btn-no" onclick="goToPage('3')">Back</button>
+            <button class="btn-next" onclick="goToPage('message')">Next</button>
         </div>
     </div>
 
@@ -146,8 +180,8 @@
 
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
-        // ลิงก์ YouTube เพลงที่จะพาไปเมื่อเขากด No ในหน้าขอเป็นแฟน
-        const youtubeSongUrl = "https://youtu.be/W8a4sUabCUo?si=XhKi_iUOyhJ0eZun"; 
+        // ใส่รหัส Video ID จากลิงก์ YouTube (หลัง v=) เช่น irCD8WvvS88
+        const youtubeVideoId = "iUOyhJ0eZun"; 
 
         let savedName = "";
         let page1Answer = "-";
@@ -165,14 +199,12 @@
             goToPage('1');
         }
 
-        // จัดการเมื่อเลื่อนเมาส์/แตะโดนปุ่ม No (เฉพาะหน้า 1)
         function handleNoHover(btn, yesBtnId) {
             if (noAttemptCount < 2) {
                 moveNoBtn(btn, yesBtnId);
             }
         }
 
-        // จัดการเมื่อคลิกปุ่ม No (เฉพาะหน้า 1)
         function handleNoClick(btn, yesBtnId) {
             if (noAttemptCount < 2) {
                 moveNoBtn(btn, yesBtnId);
@@ -181,23 +213,17 @@
             }
         }
 
-        // ย้ายตำแหน่งปุ่ม No (เฉพาะหน้า 1)
         function moveNoBtn(btn, yesBtnId) {
             noAttemptCount++;
-            
             if (noAttemptCount < 3) {
                 btn.style.position = "fixed";
-                
                 const padding = 50;
                 const maxX = window.innerWidth - btn.offsetWidth - padding;
                 const maxY = window.innerHeight - btn.offsetHeight - padding;
-
                 const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
                 const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
-
                 btn.style.left = randomX + "px";
                 btn.style.top = randomY + "px";
-
                 yesScale += 0.2;
                 const yesBtn = document.getElementById(yesBtnId);
                 if (yesBtn) {
@@ -212,13 +238,9 @@
             yesScale = 1.0;
             noAttemptCount = 0;
             const btn = document.getElementById('p1-no');
-            if (btn) {
-                btn.style.position = "static";
-            }
+            if (btn) btn.style.position = "static";
             const yesBtn = document.getElementById('p1-yes');
-            if (yesBtn) {
-                yesBtn.style.transform = "scale(1.0)";
-            }
+            if (yesBtn) yesBtn.style.transform = "scale(1.0)";
         }
 
         function answerPage1(ans, nextPageId) {
@@ -229,57 +251,27 @@
 
         function answerPage3(ans, nextPageId) {
             page3Answer = ans;
-            if (nextPageId === 'redirect') {
-                // แสดงป๊อปอัปบอกก่อนย้ายหน้า
+            if (ans === 'No') {
                 alert("I'd like you to listen to this song.");
-                submitAndRedirect();
+                // โหลดวิดีโอ YouTube เข้ามาใน iframe
+                document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`;
+                goToPage('player');
             } else {
                 goToPage(nextPageId);
             }
         }
 
-        function submitAndRedirect() {
-            let combinedAnswer = "Page 1: " + page1Answer + " | Page 3: No";
-
-            // บันทึกคำตอบลง SheetDB ก่อนย้ายหน้า
-            fetch(SHEETDB_URL, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    data: {
-                        "name": savedName,
-                        "answer": combinedAnswer,
-                        "message": "Rejected gf request -> Redirected to YouTube",
-                        "timestamp": "'" + new Date().toLocaleString('en-US')
-                    }
-                })
-            }).finally(() => {
-                // ย้ายหน้าไปยัง YouTube ทันที
-                window.location.href = youtubeSongUrl;
-            });
-        }
-
         function submitFinalData(nextPageId) {
             const messageInput = document.getElementById('user-message').value.trim();
             const finalMessage = messageInput !== "" ? messageInput : "-";
-
             let combinedAnswer = "Page 1: " + page1Answer + " | Page 3: " + page3Answer;
 
             goToPage(nextPageId);
-
-            if (nextPageId === '4') {
-                launchConfetti();
-            }
+            if (nextPageId === '4') launchConfetti();
 
             fetch(SHEETDB_URL, {
                 method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     data: {
                         "name": savedName,
@@ -294,45 +286,33 @@
         function launchConfetti() {
             var duration = 3 * 1000;
             var end = Date.now() + duration;
-
             (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: ['#ff6b81', '#ffb6c1', '#ffffff', '#ff4757']
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: ['#ff6b81', '#ffb6c1', '#ffffff', '#ff4757']
-                });
-
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ff6b81', '#ffb6c1', '#ffffff', '#ff4757'] });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ff6b81', '#ffb6c1', '#ffffff', '#ff4757'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
 
         function goToPage(pageId) {
             const pages = document.querySelectorAll('.card');
             pages.forEach(page => page.classList.add('hidden'));
-            
-            if (pageId === 'start') {
-                document.getElementById('page-start').classList.remove('hidden');
-            } else if (pageId === 'message') {
-                document.getElementById('page-message').classList.remove('hidden');
+
+            if (pageId === 'player') {
+                document.getElementById('page-player').classList.remove('hidden');
             } else {
-                document.getElementById('page-' + pageId).classList.remove('hidden');
+                // หากย้ายออกจากหน้าเล่นเพลง ให้สั่งหยุดเล่นวิดีโอ
+                document.getElementById('yt-iframe').src = "";
+                
+                if (pageId === 'start') document.getElementById('page-start').classList.remove('hidden');
+                else if (pageId === 'message') document.getElementById('page-message').classList.remove('hidden');
+                else document.getElementById('page-' + pageId).classList.remove('hidden');
             }
         }
 
         function resetApp() {
             document.getElementById('user-name').value = "";
             document.getElementById('user-message').value = "";
+            document.getElementById('yt-iframe').src = "";
             savedName = "";
             page1Answer = "-";
             page3Answer = "-";
@@ -341,5 +321,5 @@
         }
     </script>
 </body>
-    </html>
-            
+                                                                                                                                                               </html>
+        
