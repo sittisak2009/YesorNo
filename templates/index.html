@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Do you like me?</title>
-    <!-- JS Canvas Confetti library for fireworks -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -74,11 +73,10 @@
             border-color: #ff6b81;
         }
 
-        /* Responsive YouTube Container */
         .video-container {
             position: relative;
             width: 100%;
-            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            padding-bottom: 56.25%;
             height: 0;
             overflow: hidden;
             border-radius: 12px;
@@ -101,9 +99,7 @@
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Welcome ❤️</h1>
         <p>Please enter your name first</p>
-        
         <input type="text" id="user-name" class="custom-input" placeholder="Type your name here..." autocomplete="off">
-        
         <div class="btn-group">
             <button class="btn-next" onclick="startSurvey()">Next</button>
         </div>
@@ -140,35 +136,32 @@
         </div>
     </div>
 
-    <!-- Page Music Player: หน้านี้จะฉายคลิป YouTube บนการ์ด -->
+    <!-- Page Music Player (กรณีตอบ No) -->
     <div id="page-player" class="card hidden">
         <h2 style="color: #ff6b81; margin-top: 0;">Please listen to this song 🎵</h2>
         
         <div class="video-container">
-            <!-- รหัสไอดีวิดีโอ YouTube จะถูกนำมาใส่ตรงนี้ -->
             <iframe id="yt-iframe" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
         <div class="btn-group" style="margin-top: 1rem;">
             <button class="btn-no" onclick="goToPage('3')">Back</button>
-            <button class="btn-next" onclick="goToPage('message')">Next</button>
+            <button class="btn-next" onclick="finishWithGoodbye()">Next</button>
         </div>
     </div>
 
-    <!-- Page Message -->
+    <!-- Page Message (กรณีตอบ Yes) -->
     <div id="page-message" class="card hidden">
         <img src="/happy.png" alt="Message" class="card-img">
         <h1>Anything you'd like to tell me? 💌</h1>
         <p>Feel free to leave a message for me</p>
-        
         <textarea id="user-message" class="custom-input" placeholder="Type your message here... (optional)"></textarea>
-        
         <div class="btn-group">
             <button class="btn-yes" onclick="submitFinalData('4')">Send Message</button>
         </div>
     </div>
 
-    <!-- Page 4 -->
+    <!-- Page 4 (กรณีตอบ Yes - สมหวัง) -->
     <div id="page-4" class="card hidden">
         <img src="/happy.png" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
@@ -178,10 +171,22 @@
         </div>
     </div>
 
+    <!-- Page Goodbye (กรณีตอบ No - หน้าบอกลา) -->
+    <div id="page-goodbye" class="card hidden">
+        <img src="/panda.gif" alt="Sad" class="card-img">
+        <h1 style="color: #70a1ff;">Goodbye 👋</h1>
+        <p>Thank you for your time. Wish you all the best!</p>
+        <div class="btn-group">
+            <button class="btn-next" onclick="resetApp()">Back to Start</button>
+        </div>
+    </div>
+
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
-        // ใส่รหัส Video ID จากลิงก์ YouTube (หลัง v=) เช่น irCD8WvvS88
-        const youtubeVideoId = "iUOyhJ0eZun"; 
+        
+        // ⚠️ สำคัญ: ใช้ ID คลิป YouTube ที่อนุญาตให้ฝังในเว็บอื่นได้ (เช่น ลิงก์คลิปเนื้อเพลง)
+        // ตัวอย่าง: "L3wKzyIN1yk" หรือเปลี่ยนเป็นรหัสคลิปของคุณ
+        const youtubeVideoId = "bFMb3ZVfKgt1"; 
 
         let savedName = "";
         let page1Answer = "-";
@@ -200,9 +205,7 @@
         }
 
         function handleNoHover(btn, yesBtnId) {
-            if (noAttemptCount < 2) {
-                moveNoBtn(btn, yesBtnId);
-            }
+            if (noAttemptCount < 2) moveNoBtn(btn, yesBtnId);
         }
 
         function handleNoClick(btn, yesBtnId) {
@@ -226,9 +229,7 @@
                 btn.style.top = randomY + "px";
                 yesScale += 0.2;
                 const yesBtn = document.getElementById(yesBtnId);
-                if (yesBtn) {
-                    yesBtn.style.transform = `scale(${yesScale})`;
-                }
+                if (yesBtn) yesBtn.style.transform = `scale(${yesScale})`;
             } else {
                 btn.style.position = "static";
             }
@@ -253,12 +254,31 @@
             page3Answer = ans;
             if (ans === 'No') {
                 alert("I'd like you to listen to this song.");
-                // โหลดวิดีโอ YouTube เข้ามาใน iframe
-                document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`;
+                document.getElementById('yt-iframe').src = `https://www.youtube.com/embed/${youtubeVideoId}`;
                 goToPage('player');
             } else {
                 goToPage(nextPageId);
             }
+        }
+
+        // ฟังก์ชันจบงานกรณีปฏิเสธ (ส่งข้อมูลเข้า SheetDB แล้วแสดงหน้า Goodbye)
+        function finishWithGoodbye() {
+            let combinedAnswer = "Page 1: " + page1Answer + " | Page 3: " + page3Answer;
+            
+            fetch(SHEETDB_URL, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: {
+                        "name": savedName,
+                        "answer": combinedAnswer,
+                        "message": "Rejected gf request -> Listened to song",
+                        "timestamp": "'" + new Date().toLocaleString('en-US')
+                    }
+                })
+            }).catch(err => console.error("Error:", err));
+
+            goToPage('goodbye');
         }
 
         function submitFinalData(nextPageId) {
@@ -300,11 +320,11 @@
             if (pageId === 'player') {
                 document.getElementById('page-player').classList.remove('hidden');
             } else {
-                // หากย้ายออกจากหน้าเล่นเพลง ให้สั่งหยุดเล่นวิดีโอ
                 document.getElementById('yt-iframe').src = "";
                 
                 if (pageId === 'start') document.getElementById('page-start').classList.remove('hidden');
                 else if (pageId === 'message') document.getElementById('page-message').classList.remove('hidden');
+                else if (pageId === 'goodbye') document.getElementById('page-goodbye').classList.remove('hidden');
                 else document.getElementById('page-' + pageId).classList.remove('hidden');
             }
         }
@@ -321,5 +341,5 @@
         }
     </script>
 </body>
-                                                                                                                                                               </html>
-        
+    </html>
+    
