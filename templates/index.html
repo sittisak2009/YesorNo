@@ -16,6 +16,21 @@
         .btn-no { background-color: #a4b0be; }
         .btn-next { background-color: #70a1ff; }
         .hidden { display: none; }
+        
+        /* สไตล์ของช่องกรอกชื่อ */
+        .name-input {
+            width: 80%;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border: 2px solid #ffb6c1;
+            border-radius: 15px;
+            outline: none;
+            font-size: 15px;
+            text-align: center;
+        }
+        .name-input:focus {
+            border-color: #ff6b81;
+        }
     </style>
 </head>
 <body>
@@ -24,7 +39,11 @@
     <div id="page-1" class="card">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
-        <p>The website was created by Fluke</p>
+        <p>Your name</p>
+        
+        <!-- ช่องกรอกชื่อ -->
+        <input type="text" id="user-name" class="name-input" placeholder="พิมพ์ชื่อตรงนี้..." required>
+        
         <div class="btn-group">
             <button class="btn-yes" onclick="sendToSheet('Page 1: Yes', '2')">Yes</button>
             <button class="btn-no" onclick="sendToSheet('Page 1: No', 'end')">No</button>
@@ -34,8 +53,7 @@
     <!-- Page 2 -->
     <div id="page-2" class="card hidden">
         <img src="/happy.png" alt="Happy" class="card-img">
-        <h1>I like you too</h1>
-        <p>The website was created by Fluke</p>
+        <h1>I like you too ❤️</h1>
         <div class="btn-group">
             <button class="btn-next" onclick="goToPage('3')">Next</button>
         </div>
@@ -45,7 +63,7 @@
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
-        <p>The website was created by Fluke</p>
+        <p>Page 3</p>
         <div class="btn-group">
             <button class="btn-yes" onclick="sendToSheet('Page 3: Yes', '4')">Yes</button>
             <button class="btn-no" onclick="sendToSheet('Page 3: No', 'end')">No</button>
@@ -56,7 +74,7 @@
     <div id="page-4" class="card hidden">
         <img src="/happy.png" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
-        <h2>See you soon! Baby</h2>
+        <h2>I won't let you down Baby</h2>
         <div class="btn-group">
             <button class="btn-next" onclick="goToPage('1')">Back to Start</button>
         </div>
@@ -69,12 +87,17 @@
     </div>
 
     <script>
-        // API URL จาก SheetDB ของคุณ
         const SHEETDB_URL = "https://sheetdb.io/api/v1/gyjm8w6u4u7ab";
 
         function sendToSheet(answerText, nextPageId) {
+            // ดึงชื่อที่กรอกไว้ (ถ้าไม่ได้พิมพ์จะใส่ว่า "ไม่ระบุชื่อ")
+            const nameInput = document.getElementById('user-name').value.trim();
+            const userName = nameInput !== "" ? nameInput : "ไม่ระบุชื่อ";
+
+            // เปลี่ยนหน้าทันที
             goToPage(nextPageId);
 
+            // ส่งชื่อ คำตอบ และเวลา เข้า SheetDB
             fetch(SHEETDB_URL, {
                 method: 'POST',
                 headers: {
@@ -83,6 +106,7 @@
                 },
                 body: JSON.stringify({
                     data: {
+                        "name": userName,
                         "answer": answerText,
                         "timestamp": new Date().toLocaleString('th-TH')
                     }
