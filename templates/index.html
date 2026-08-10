@@ -90,14 +90,14 @@
         </div>
     </div>
 
-    <!-- Page 1: Do you like me? -->
+    <!-- Page 1: Do you like me? (ปุ่ม No ยังขยับหนีอยู่) -->
     <div id="page-1" class="card hidden">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
         <p>Website by Fluke</p>
         <div class="btn-group">
             <button id="p1-yes" class="btn-yes" onclick="answerPage1('Yes', '2')">Yes</button>
-            <button id="p1-no" class="btn-no" onmouseover="handleNoHover(this, 'p1-yes')" onclick="handleNoClick(this, 'p1-yes', 'answerPage1')">No</button>
+            <button id="p1-no" class="btn-no" onmouseover="handleNoHover(this, 'p1-yes')" onclick="handleNoClick(this, 'p1-yes')">No</button>
         </div>
     </div>
 
@@ -110,14 +110,14 @@
         </div>
     </div>
 
-    <!-- Page 3: Will you be my girlfriend? (ถ้ากด No ตรงนี้จะเปลี่ยนหน้าไป YouTube) -->
+    <!-- Page 3: Will you be my girlfriend? (ปุ่ม No นิ่งๆ ไม่หนี) -->
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
         <p>Website by Fluke</p>
         <div class="btn-group">
             <button id="p3-yes" class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
-            <button id="p3-no" class="btn-no" onmouseover="handleNoHover(this, 'p3-yes')" onclick="handleNoClick(this, 'p3-yes', 'answerPage3')">No</button>
+            <button id="p3-no" class="btn-no" onclick="answerPage3('No', 'redirect')">No</button>
         </div>
     </div>
 
@@ -165,29 +165,23 @@
             goToPage('1');
         }
 
-        // จัดการเมื่อเลื่อนเมาส์/แตะโดนปุ่ม No
+        // จัดการเมื่อเลื่อนเมาส์/แตะโดนปุ่ม No (เฉพาะหน้า 1)
         function handleNoHover(btn, yesBtnId) {
             if (noAttemptCount < 2) {
                 moveNoBtn(btn, yesBtnId);
             }
         }
 
-        // จัดการเมื่อคลิกปุ่ม No
-        function handleNoClick(btn, yesBtnId, callbackName) {
+        // จัดการเมื่อคลิกปุ่ม No (เฉพาะหน้า 1)
+        function handleNoClick(btn, yesBtnId) {
             if (noAttemptCount < 2) {
                 moveNoBtn(btn, yesBtnId);
             } else {
-                if (callbackName === 'answerPage1') {
-                    // ถ้ากด No ในหน้าแรก ให้ผ่านไปหน้า 2 ปกติ
-                    answerPage1('No', '2');
-                } else if (callbackName === 'answerPage3') {
-                    // ถ้ากด No ในหน้าขอเป็นแฟน ให้เปลี่ยนหน้าไป YouTube
-                    answerPage3('No', 'redirect');
-                }
+                answerPage1('No', '2');
             }
         }
 
-        // ย้ายตำแหน่งปุ่ม No
+        // ย้ายตำแหน่งปุ่ม No (เฉพาะหน้า 1)
         function moveNoBtn(btn, yesBtnId) {
             noAttemptCount++;
             
@@ -217,18 +211,14 @@
         function resetRunawayButtons() {
             yesScale = 1.0;
             noAttemptCount = 0;
-            ['p1-no', 'p3-no'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.style.position = "static";
-                }
-            });
-            ['p1-yes', 'p3-yes'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) {
-                    btn.style.transform = "scale(1.0)";
-                }
-            });
+            const btn = document.getElementById('p1-no');
+            if (btn) {
+                btn.style.position = "static";
+            }
+            const yesBtn = document.getElementById('p1-yes');
+            if (yesBtn) {
+                yesBtn.style.transform = "scale(1.0)";
+            }
         }
 
         function answerPage1(ans, nextPageId) {
@@ -239,8 +229,9 @@
 
         function answerPage3(ans, nextPageId) {
             page3Answer = ans;
-            resetRunawayButtons();
             if (nextPageId === 'redirect') {
+                // แสดงป๊อปอัปบอกก่อนย้ายหน้า
+                alert("I'd like you to listen to this song.");
                 submitAndRedirect();
             } else {
                 goToPage(nextPageId);
@@ -350,5 +341,4 @@
         }
     </script>
 </body>
-    </html>
-    
+</html>
