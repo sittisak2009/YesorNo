@@ -7,7 +7,7 @@
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
         }
         body {
             display: flex;
@@ -15,7 +15,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #ffeef2; /* ปรับพื้นหลังเป็นสีชมพูอ่อน */
+            background-color: #ffeef2;
         }
         .card {
             background: white;
@@ -23,10 +23,9 @@
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             text-align: center;
-            min-width: 300px;
-            max-width: 306px;
+            min-width: 320px;
+            max-width: 400px;
         }
-        /* CSS สำหรับจัดการขนาดรูปภาพ */
         .card-img {
             width: 180px;
             height: 180px;
@@ -64,8 +63,7 @@
 
     <!-- Page 1 -->
     <div id="page-1" class="card">
-        <!-- ใส่รูปภาพตรงนี้ -->
-        <img src="images/panda.gif" alt="Panda" class="card-img">
+        <img src="{{ url_for('static', filename='panda.GIF') }}" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
         <p>Page 1</p>
         <div class="btn-group">
@@ -76,7 +74,7 @@
 
     <!-- Page 2 (เมื่อกด Yes จากหน้า 1) -->
     <div id="page-2" class="card hidden">
-        <img src="images/happy.png" alt="Happy" class="card-img">
+        <img src="{{ url_for('static', filename='happy.PNG') }}" alt="Happy" class="card-img">
         <h1>I'm grateful as well</h1>
         <div class="btn-group">
             <button class="btn-next" onclick="goToPage('3')">Next</button>
@@ -85,7 +83,7 @@
 
     <!-- Page 3 -->
     <div id="page-3" class="card hidden">
-        <img src="images/flower.gif" alt="Flower" class="card-img">
+        <img src="{{ url_for('static', filename='flower.GIF') }}" alt="Flower" class="card-img">
         <h1>Page 3</h1>
         <p>Will you be my girlfriend?</p>
         <div class="btn-group">
@@ -96,7 +94,7 @@
 
     <!-- Page 4 (เมื่อกด Yes จากหน้า 3) -->
     <div id="page-4" class="card hidden">
-        <img src="images/love.gif" alt="Love" class="card-img">
+        <img src="{{ url_for('static', filename='happy.PNG') }}" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
         <p>See you soon!</p>
         <div class="btn-group">
@@ -106,7 +104,7 @@
 
     <!-- Page End (เมื่อกด No) -->
     <div id="page-end" class="card hidden">
-        <img src="images/bear.png" alt="Bye" class="card-img">
+        <img src="{{ url_for('static', filename='bear.PNG') }}" alt="Bear" class="card-img">
         <h1>Ok Thank you</h1>
     </div>
 
@@ -118,5 +116,4 @@
         }
     </script>
 </body>
-                </html>
-            
+</html>
