@@ -17,15 +17,15 @@
         .btn-next { background-color: #70a1ff; }
         .hidden { display: none; }
         
-        /* สไตล์ของช่องกรอกชื่อ */
+        /* สไตล์ช่องกรอกชื่อ */
         .name-input {
-            width: 80%;
-            padding: 10px 15px;
-            margin-top: 10px;
+            width: 85%;
+            padding: 12px 15px;
+            margin-top: 15px;
             border: 2px solid #ffb6c1;
             border-radius: 15px;
             outline: none;
-            font-size: 15px;
+            font-size: 16px;
             text-align: center;
         }
         .name-input:focus {
@@ -35,15 +35,24 @@
 </head>
 <body>
 
-    <!-- Page 1 -->
-    <div id="page-1" class="card">
+    <!-- Page Start (กรอกชื่อ) -->
+    <div id="page-start" class="card">
         <img src="/panda.gif" alt="Panda" class="card-img">
-        <h1>Do you like me?</h1>
+        <h1>Welcome ❤️</h1>
         <p>Your name</p>
         
-        <!-- ช่องกรอกชื่อ -->
-        <input type="text" id="user-name" class="name-input" placeholder="พิมพ์ชื่อตรงนี้..." required>
+        <input type="text" id="user-name" class="name-input" placeholder="พิมพ์ชื่อตรงนี้..." autocomplete="off">
         
+        <div class="btn-group">
+            <button class="btn-next" onclick="startSurvey()">ถัดไป</button>
+        </div>
+    </div>
+
+    <!-- Page 1 -->
+    <div id="page-1" class="card hidden">
+        <img src="/panda.gif" alt="Panda" class="card-img">
+        <h1>Do you like me?</h1>
+        <p>The website was created by Fluke</p>
         <div class="btn-group">
             <button class="btn-yes" onclick="sendToSheet('Page 1: Yes', '2')">Yes</button>
             <button class="btn-no" onclick="sendToSheet('Page 1: No', 'end')">No</button>
@@ -63,7 +72,7 @@
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
-        <p>Page 3</p>
+        <p>The website was created by Fluke</p>
         <div class="btn-group">
             <button class="btn-yes" onclick="sendToSheet('Page 3: Yes', '4')">Yes</button>
             <button class="btn-no" onclick="sendToSheet('Page 3: No', 'end')">No</button>
@@ -74,9 +83,9 @@
     <div id="page-4" class="card hidden">
         <img src="/happy.png" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
-        <h2>I won't let you down Baby</h2>
+        <h2>See you soon! Baby</h2>
         <div class="btn-group">
-            <button class="btn-next" onclick="goToPage('1')">Back to Start</button>
+            <button class="btn-next" onclick="resetApp()">Back to Start</button>
         </div>
     </div>
 
@@ -88,16 +97,23 @@
 
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/gyjm8w6u4u7ab";
+        let savedName = "";
 
-        function sendToSheet(answerText, nextPageId) {
-            // ดึงชื่อที่กรอกไว้ (ถ้าไม่ได้พิมพ์จะใส่ว่า "ไม่ระบุชื่อ")
+        // ฟังก์ชันตรวจสอบและย้ายจากหน้าใส่ชื่อไปหน้าแรก
+        function startSurvey() {
             const nameInput = document.getElementById('user-name').value.trim();
-            const userName = nameInput !== "" ? nameInput : "ไม่ระบุชื่อ";
+            if (nameInput === "") {
+                alert("กรุณากรอกชื่อก่อนกดถัดไปนะครับ");
+                return;
+            }
+            savedName = nameInput;
+            goToPage('1');
+        }
 
-            // เปลี่ยนหน้าทันที
+        // ฟังก์ชันส่งข้อมูลคำตอบพร้อมชื่อเข้า Google Sheets
+        function sendToSheet(answerText, nextPageId) {
             goToPage(nextPageId);
 
-            // ส่งชื่อ คำตอบ และเวลา เข้า SheetDB
             fetch(SHEETDB_URL, {
                 method: 'POST',
                 headers: {
@@ -106,7 +122,7 @@
                 },
                 body: JSON.stringify({
                     data: {
-                        "name": userName,
+                        "name": savedName,
                         "answer": answerText,
                         "timestamp": new Date().toLocaleString('th-TH')
                     }
@@ -114,10 +130,23 @@
             }).catch(err => console.error("Error:", err));
         }
 
+        // ฟังก์ชันสลับหน้า
         function goToPage(pageId) {
             const pages = document.querySelectorAll('.card');
             pages.forEach(page => page.classList.add('hidden'));
-            document.getElementById('page-' + pageId).classList.remove('hidden');
+            
+            if(pageId === 'start') {
+                document.getElementById('page-start').classList.remove('hidden');
+            } else {
+                document.getElementById('page-' + pageId).classList.remove('hidden');
+            }
+        }
+
+        // รีเซ็ตเพื่อกลับไปหน้ากรอกชื่อใหม่
+        function resetApp() {
+            document.getElementById('user-name').value = "";
+            savedName = "";
+            goToPage('start');
         }
     </script>
 </body>
