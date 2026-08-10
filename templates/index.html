@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,31 +17,36 @@
         .btn-next { background-color: #70a1ff; }
         .hidden { display: none; }
         
-        /* สไตล์ช่องกรอกชื่อ */
-        .name-input {
+        /* Input styles for name and message */
+        .custom-input {
             width: 85%;
             padding: 12px 15px;
             margin-top: 15px;
             border: 2px solid #ffb6c1;
             border-radius: 15px;
             outline: none;
-            font-size: 16px;
+            font-size: 15px;
             text-align: center;
         }
-        .name-input:focus {
+        textarea.custom-input {
+            height: 90px;
+            resize: none;
+            text-align: left;
+        }
+        .custom-input:focus {
             border-color: #ff6b81;
         }
     </style>
 </head>
 <body>
 
-    <!-- Page Start (กรอกชื่อ) -->
+    <!-- Page Start (Enter Name) -->
     <div id="page-start" class="card">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Welcome ❤️</h1>
-        <h2>Your name</h2>
+        <p>Please enter your name first</p>
         
-        <input type="text" id="user-name" class="name-input" placeholder="Type your name here..." autocomplete="off">
+        <input type="text" id="user-name" class="custom-input" placeholder="Type your name here..." autocomplete="off">
         
         <div class="btn-group">
             <button class="btn-next" onclick="startSurvey()">Next</button>
@@ -52,10 +57,10 @@
     <div id="page-1" class="card hidden">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
-        <p>The website was created by Fluke</p>
+        <p>Website by Fluke</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="sendToSheet('Page 1: Yes', '2')">Yes</button>
-            <button class="btn-no" onclick="sendToSheet('Page 1: No', 'end')">No</button>
+            <button class="btn-yes" onclick="selectAnswer('Page 1: Yes', '2')">Yes</button>
+            <button class="btn-no" onclick="selectAnswer('Page 1: No', 'end')">No</button>
         </div>
     </div>
 
@@ -72,10 +77,23 @@
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
-        <p>The website was created by Fluke</p>
+        <p>Website by Fluke</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="sendToSheet('Page 3: Yes', '4')">Yes</button>
-            <button class="btn-no" onclick="sendToSheet('Page 3: No', 'end')">No</button>
+            <button class="btn-yes" onclick="selectAnswer('Page 3: Yes', 'message')">Yes</button>
+            <button class="btn-no" onclick="selectAnswer('Page 3: No', 'end')">No</button>
+        </div>
+    </div>
+
+    <!-- Page Message -->
+    <div id="page-message" class="card hidden">
+        <img src="/happy.png" alt="Message" class="card-img">
+        <h1>Anything you'd like to tell me? 💌</h1>
+        <p>Feel free to leave a message for me</p>
+        
+        <textarea id="user-message" class="custom-input" placeholder="Type your message here... (optional)"></textarea>
+        
+        <div class="btn-group">
+            <button class="btn-yes" onclick="submitFinalData('4')">Send Message</button>
         </div>
     </div>
 
@@ -92,26 +110,40 @@
     <!-- Page End -->
     <div id="page-end" class="card hidden">
         <img src="/bear.png" alt="Bear" class="card-img">
-        <h1>Ok Thank you</h1>
+        <h1>Ok, Thank you</h1>
     </div>
 
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
         let savedName = "";
+        let savedAnswer = "";
 
-        // ฟังก์ชันตรวจสอบและย้ายจากหน้าใส่ชื่อไปหน้าแรก
+        // Start with name input validation
         function startSurvey() {
             const nameInput = document.getElementById('user-name').value.trim();
             if (nameInput === "") {
-                alert("กรุณากรอกชื่อก่อนกดถัดไปนะครับ");
+                alert("Please enter your name before proceeding.");
                 return;
             }
             savedName = nameInput;
             goToPage('1');
         }
 
-        // ฟังก์ชันส่งข้อมูลคำตอบพร้อมชื่อเข้า Google Sheets
-        function sendToSheet(answerText, nextPageId) {
+        // Store selected answer temporarily
+        function selectAnswer(answerText, nextPageId) {
+            savedAnswer = answerText;
+            if (nextPageId === 'end') {
+                submitFinalData('end');
+            } else {
+                goToPage(nextPageId);
+            }
+        }
+
+        // Submit all collected data to Google Sheets via SheetDB
+        function submitFinalData(nextPageId) {
+            const messageInput = document.getElementById('user-message').value.trim();
+            const finalMessage = messageInput !== "" ? messageInput : "-";
+
             goToPage(nextPageId);
 
             fetch(SHEETDB_URL, {
@@ -123,29 +155,34 @@
                 body: JSON.stringify({
                     data: {
                         "name": savedName,
-                        "answer": answerText,
-                        "timestamp": new Date().toLocaleString('th-TH')
+                        "answer": savedAnswer,
+                        "message": finalMessage,
+                        "timestamp": new Date().toLocaleString('en-US')
                     }
                 })
             }).catch(err => console.error("Error:", err));
         }
 
-        // ฟังก์ชันสลับหน้า
+        // Handle page navigation
         function goToPage(pageId) {
             const pages = document.querySelectorAll('.card');
             pages.forEach(page => page.classList.add('hidden'));
             
-            if(pageId === 'start') {
+            if (pageId === 'start') {
                 document.getElementById('page-start').classList.remove('hidden');
+            } else if (pageId === 'message') {
+                document.getElementById('page-message').classList.remove('hidden');
             } else {
                 document.getElementById('page-' + pageId).classList.remove('hidden');
             }
         }
 
-        // รีเซ็ตเพื่อกลับไปหน้ากรอกชื่อใหม่
+        // Reset inputs and state
         function resetApp() {
             document.getElementById('user-name').value = "";
+            document.getElementById('user-message').value = "";
             savedName = "";
+            savedAnswer = "";
             goToPage('start');
         }
     </script>
