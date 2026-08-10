@@ -55,7 +55,7 @@
     <div id="page-4" class="card hidden">
         <img src="/happy.png" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
-        <h2>See you soon! Baby😊</h2>
+        <h2>See you soon! Baby</h2>
         <div class="btn-group">
             <button class="btn-next" onclick="goToPage('1')">Back to Start</button>
         </div>
@@ -67,31 +67,21 @@
         <h1>Ok Thank you</h1>
     </div>
 
-    <!-- Hidden iframe สำหรับรับข้อมูลส่งออกเบื้องหลัง -->
-    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-
     <script>
-        // ⚠️ นำ URL เว็บแอป Apps Script ของคุณมาวางตรงนี้
+        // นำ URL ของ Apps Script ที่ลงท้ายด้วย /exec มาวางตรงนี้
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1UwmCgb5UCkK2Y9TuMmJ0TMlCE7ty21pvIEwvj7FqSLM9tr3UPaFIvdRY4R2WLdA3/exec";
+
         function sendToSheet(answerText, nextPageId) {
-            // สร้าง Form จำลองแล้วส่งเข้า Google Apps Script
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = SCRIPT_URL;
-            form.target = 'hidden_iframe';
-
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'answer';
-            input.value = answerText;
-
-            form.appendChild(input);
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-
-            // เปลี่ยนหน้าถัดไป
+            // 1. เปลี่ยนหน้าในเว็บทันที ไม่ต้องรอส่งข้อมูลเสร็จ
             goToPage(nextPageId);
+
+            // 2. ส่งข้อมูลเบื้องหลังแบบ asynchronous (ไม่ดัก/ไม่ขัดการทำงานหน้าเว็บ)
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "answer=" + encodeURIComponent(answerText)
+            }).catch(err => console.error("Error:", err));
         }
 
         function goToPage(pageId) {
