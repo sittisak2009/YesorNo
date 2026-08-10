@@ -90,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Page 1 -->
+    <!-- Page 1: Do you like me? -->
     <div id="page-1" class="card hidden">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
@@ -110,7 +110,7 @@
         </div>
     </div>
 
-    <!-- Page 3 -->
+    <!-- Page 3: Will you be my girlfriend? (ถ้ากด No ตรงนี้จะเปลี่ยนหน้าไป YouTube) -->
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
@@ -146,7 +146,7 @@
 
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
-        // ลิงก์ YouTube เพลงที่จะพาไปเมื่อเขากด No
+        // ลิงก์ YouTube เพลงที่จะพาไปเมื่อเขากด No ในหน้าขอเป็นแฟน
         const youtubeSongUrl = "https://youtu.be/W8a4sUabCUo?si=XhKi_iUOyhJ0eZun"; 
 
         let savedName = "";
@@ -178,8 +178,10 @@
                 moveNoBtn(btn, yesBtnId);
             } else {
                 if (callbackName === 'answerPage1') {
-                    answerPage1('No', 'redirect');
+                    // ถ้ากด No ในหน้าแรก ให้ผ่านไปหน้า 2 ปกติ
+                    answerPage1('No', '2');
                 } else if (callbackName === 'answerPage3') {
+                    // ถ้ากด No ในหน้าขอเป็นแฟน ให้เปลี่ยนหน้าไป YouTube
                     answerPage3('No', 'redirect');
                 }
             }
@@ -232,30 +234,23 @@
         function answerPage1(ans, nextPageId) {
             page1Answer = ans;
             resetRunawayButtons();
-            if (nextPageId === 'redirect') {
-                submitAndRedirect('No');
-            } else {
-                goToPage(nextPageId);
-            }
+            goToPage(nextPageId);
         }
 
         function answerPage3(ans, nextPageId) {
             page3Answer = ans;
             resetRunawayButtons();
             if (nextPageId === 'redirect') {
-                submitAndRedirect('No');
+                submitAndRedirect();
             } else {
                 goToPage(nextPageId);
             }
         }
 
-        function submitAndRedirect(ans) {
-            let combinedAnswer = "Page 1: " + page1Answer;
-            if (page3Answer !== "-") {
-                combinedAnswer += " | Page 3: " + page3Answer;
-            }
+        function submitAndRedirect() {
+            let combinedAnswer = "Page 1: " + page1Answer + " | Page 3: No";
 
-            // ส่งข้อมูลบันทึกเข้า SheetDB ก่อนเปลี่ยนหน้า
+            // บันทึกคำตอบลง SheetDB ก่อนย้ายหน้า
             fetch(SHEETDB_URL, {
                 method: 'POST',
                 headers: {
@@ -266,12 +261,12 @@
                     data: {
                         "name": savedName,
                         "answer": combinedAnswer,
-                        "message": "User selected NO -> Redirected to YouTube",
+                        "message": "Rejected gf request -> Redirected to YouTube",
                         "timestamp": "'" + new Date().toLocaleString('en-US')
                     }
                 })
             }).finally(() => {
-                // พาย้ายหน้าไปยังลิงก์ YouTube ทันที
+                // ย้ายหน้าไปยัง YouTube ทันที
                 window.location.href = youtubeSongUrl;
             });
         }
@@ -280,10 +275,7 @@
             const messageInput = document.getElementById('user-message').value.trim();
             const finalMessage = messageInput !== "" ? messageInput : "-";
 
-            let combinedAnswer = "Page 1: " + page1Answer;
-            if (page3Answer !== "-") {
-                combinedAnswer += " | Page 3: " + page3Answer;
-            }
+            let combinedAnswer = "Page 1: " + page1Answer + " | Page 3: " + page3Answer;
 
             goToPage(nextPageId);
 
@@ -358,4 +350,5 @@
         }
     </script>
 </body>
-</html>
+    </html>
+    
