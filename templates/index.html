@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Flask Web App</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f4f9; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; min-width: 300px; }
+        .btn-group { margin-top: 1.5rem; display: flex; justify-content: center; gap: 10px; }
+        button { padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; color: white; }
+        .btn-yes { background-color: #4CAF50; }
+        .btn-no { background-color: #f44336; }
+        .btn-next { background-color: #2196F3; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- หน้า 1 -->
+    <div id="page-1" class="card">
+        <h1>หน้าหลัก</h1>
+        <p>เลือกรายการที่คุณต้องการ</p>
+        <div class="btn-group">
+            <button class="btn-yes" onclick="goToPage(2)">Yes</button>
+            <button class="btn-no" onclick="alert('คุณกด No')">No</button>
+        </div>
+    </div>
+
+    <!-- หน้า 2 -->
+    <div id="page-2" class="card hidden">
+        <h1>OK Thank you</h1>
+        <div class="btn-group">
+            <button class="btn-next" onclick="goToPage(3)">Next</button>
+        </div>
+    </div>
+
+    <!-- หน้า 3 -->
+    <div id="page-3" class="card hidden">
+        <h1>หน้าถัดไป</h1>
+        <p>ยินดีต้อนรับสู่หน้าถัดไป!</p>
+    </div>
+
+    <script>
+        function goToPage(pageNumber) {
+            document.getElementById('page-1').classList.add('hidden');
+            document.getElementById('page-2').classList.add('hidden');
+            document.getElementById('page-3').classList.add('hidden');
+            document.getElementById('page-' + pageNumber).classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
