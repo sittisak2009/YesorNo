@@ -92,11 +92,32 @@
         .custom-input:focus {
             border-color: #ff6b81;
         }
+
+        /* Heart Game Styling */
+        .falling-heart {
+            position: fixed;
+            font-size: 32px;
+            cursor: pointer;
+            user-select: none;
+            z-index: 99;
+            animation: fall 4s linear forwards;
+        }
+
+        @keyframes fall {
+            0% { top: -50px; opacity: 1; }
+            100% { top: 100vh; opacity: 0; }
+        }
+
+        .game-status {
+            font-weight: bold;
+            color: #ff6b81;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Background Music (Royalty Free Cute BGM) -->
+    <!-- Background Music -->
     <audio id="bg-music" loop>
         <source src="/song.mp3" type="audio/mpeg">
     </audio>
@@ -139,14 +160,22 @@
         </div>
     </div>
 
-    <!-- Page 3 -->
+    <!-- Page 3 (Heart Game Included) -->
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
-        <h1>Will you be my girlfriend?</h1>
-        <p>Website by Fluke</p>
-        <div class="btn-group">
-            <button id="p3-yes" class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
-            <button id="p3-no" class="btn-no" onmouseover="handleNoHover(this, 'p3-yes')" onclick="handleNoClick(this, 'p3-yes', 'answerPage3')">No</button>
+        <div id="game-container">
+            <h2 style="color: #ff6b81;">Mission! 💖</h2>
+            <p>Catch 5 hearts to unlock the next question!</p>
+            <p class="game-status">Hearts Collected: <span id="heart-count">0</span> / 5</p>
+        </div>
+
+        <div id="p3-question" class="hidden">
+            <h1>Will you be my girlfriend?</h1>
+            <p>Website by Fluke</p>
+            <div class="btn-group">
+                <button id="p3-yes" class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
+                <button id="p3-no" class="btn-no" onmouseover="handleNoHover(this, 'p3-yes')" onclick="handleNoClick(this, 'p3-yes', 'answerPage3')">No</button>
+            </div>
         </div>
     </div>
 
@@ -185,7 +214,7 @@
         let page1Answer = "-";
         let page3Answer = "-";
         let yesScale = 1.0;
-        let noAttemptCount = 0; // ตัวนับจำนวนครั้งที่พยายามกด No
+        let noAttemptCount = 0;
 
         // Music toggle
         const bgMusic = document.getElementById('bg-music');
@@ -219,9 +248,55 @@
             goToPage('1');
         }
 
+        // --- Catch the Heart Game ---
+        let caughtHearts = 0;
+        let heartInterval;
+
+        function startHeartGame() {
+            caughtHearts = 0;
+            document.getElementById('heart-count').innerText = caughtHearts;
+            document.getElementById('game-container').classList.remove('hidden');
+            document.getElementById('p3-question').classList.add('hidden');
+
+            heartInterval = setInterval(spawnHeart, 800);
+        }
+
+        function spawnHeart() {
+            if (caughtHearts >= 5) {
+                clearInterval(heartInterval);
+                return;
+            }
+
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            heart.innerText = '💖';
+            heart.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+
+            heart.onclick = function() {
+                caughtHearts++;
+                document.getElementById('heart-count').innerText = caughtHearts;
+                heart.remove();
+
+                if (caughtHearts >= 5) {
+                    clearInterval(heartInterval);
+                    setTimeout(() => {
+                        document.getElementById('game-container').classList.add('hidden');
+                        document.getElementById('p3-question').classList.remove('hidden');
+                    }, 300);
+                }
+            };
+
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.remove();
+                }
+            }, 4000);
+        }
+
         // จัดการเมื่อเลื่อนเมาส์/แตะโดนปุ่ม No
         function handleNoHover(btn, yesBtnId) {
-            // หนีเฉพาะ 2 ครั้งแรกเท่านั้น
             if (noAttemptCount < 2) {
                 moveNoBtn(btn, yesBtnId);
             }
@@ -230,10 +305,8 @@
         // จัดการเมื่อคลิกปุ่ม No
         function handleNoClick(btn, yesBtnId, callbackName) {
             if (noAttemptCount < 2) {
-                // ครั้งที่ 1 และ 2 จะหนี
                 moveNoBtn(btn, yesBtnId);
             } else {
-                // ครั้งที่ 3 เป็นต้นไปให้ยอมให้กด No ได้เลย
                 if (callbackName === 'answerPage1') {
                     answerPage1('No', 'end');
                 } else if (callbackName === 'answerPage3') {
@@ -259,21 +332,19 @@
                 btn.style.left = randomX + "px";
                 btn.style.top = randomY + "px";
 
-                // ขยายปุ่ม Yes
                 yesScale += 0.2;
                 const yesBtn = document.getElementById(yesBtnId);
                 if (yesBtn) {
                     yesBtn.style.transform = `scale(${yesScale})`;
                 }
             } else {
-                // พอกด/โดนครั้งที่ 3 ย้ายปุ่มกลับมาตำแหน่งเดิมให้กดง่ายๆ
                 btn.style.position = "static";
             }
         }
 
         function resetRunawayButtons() {
             yesScale = 1.0;
-            noAttemptCount = 0; // รีเซ็ตตัวนับ
+            noAttemptCount = 0;
             ['p1-no', 'p3-no'].forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
@@ -374,6 +445,9 @@
                 document.getElementById('page-start').classList.remove('hidden');
             } else if (pageId === 'message') {
                 document.getElementById('page-message').classList.remove('hidden');
+            } else if (pageId === '3') {
+                document.getElementById('page-3').classList.remove('hidden');
+                startHeartGame();
             } else {
                 document.getElementById('page-' + pageId).classList.remove('hidden');
             }
@@ -390,4 +464,5 @@
         }
     </script>
 </body>
-</html>
+    </html>
+    
