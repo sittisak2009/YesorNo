@@ -67,18 +67,31 @@
         <h1>Ok Thank you</h1>
     </div>
 
+    <!-- Hidden iframe สำหรับรับข้อมูลส่งออกเบื้องหลัง -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
     <script>
-        // วาง URL ที่คัดลอกมาลงในอัญประกาศข้างล่างนี้
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwioMUNt9QhmiUzSA1xO-yTsZK58GABcriryCwmzNpCXaeG0zVfmP_9hFQKCA5RTmlI/exec";
+        // ⚠️ นำ URL เว็บแอป Apps Script ของคุณมาวางตรงนี้
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJ-p7lyEmOi3niVvs7mswPhtdfBy3PD1QLi_-vAV_EvyQwoAdVPZN_FrnkQ66yhGUp/exec";
 
         function sendToSheet(answerText, nextPageId) {
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ answer: answerText })
-            }).catch(err => console.error("Error:", err));
+            // สร้าง Form จำลองแล้วส่งเข้า Google Apps Script
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = SCRIPT_URL;
+            form.target = 'hidden_iframe';
 
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'answer';
+            input.value = answerText;
+
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            // เปลี่ยนหน้าถัดไป
             goToPage(nextPageId);
         }
 
