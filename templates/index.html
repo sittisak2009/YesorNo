@@ -17,7 +17,6 @@
         .btn-next { background-color: #70a1ff; }
         .hidden { display: none; }
         
-        /* Input styles for name and message */
         .custom-input {
             width: 85%;
             padding: 12px 15px;
@@ -57,10 +56,10 @@
     <div id="page-1" class="card hidden">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
-        <p>Website by Fluke</p>
+        <p>Page 1</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="selectAnswer('Page 1: Yes', '2')">Yes</button>
-            <button class="btn-no" onclick="selectAnswer('Page 1: No', 'end')">No</button>
+            <button class="btn-yes" onclick="answerPage1('Yes', '2')">Yes</button>
+            <button class="btn-no" onclick="answerPage1('No', 'end')">No</button>
         </div>
     </div>
 
@@ -77,10 +76,10 @@
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
-        <p>Website by Fluke</p>
+        <p>Page 3</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="selectAnswer('Page 3: Yes', 'message')">Yes</button>
-            <button class="btn-no" onclick="selectAnswer('Page 3: No', 'end')">No</button>
+            <button class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
+            <button class="btn-no" onclick="answerPage3('No', 'end')">No</button>
         </div>
     </div>
 
@@ -116,9 +115,9 @@
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
         let savedName = "";
-        let savedAnswer = "";
+        let page1Answer = "-";
+        let page3Answer = "-";
 
-        // Start with name input validation
         function startSurvey() {
             const nameInput = document.getElementById('user-name').value.trim();
             if (nameInput === "") {
@@ -129,9 +128,9 @@
             goToPage('1');
         }
 
-        // Store selected answer temporarily
-        function selectAnswer(answerText, nextPageId) {
-            savedAnswer = answerText;
+        // เก็บคำตอบของ Page 1
+        function answerPage1(ans, nextPageId) {
+            page1Answer = ans;
             if (nextPageId === 'end') {
                 submitFinalData('end');
             } else {
@@ -139,10 +138,25 @@
             }
         }
 
-        // Submit all collected data to Google Sheets via SheetDB
+        // เก็บคำตอบของ Page 3
+        function answerPage3(ans, nextPageId) {
+            page3Answer = ans;
+            if (nextPageId === 'end') {
+                submitFinalData('end');
+            } else {
+                goToPage(nextPageId);
+            }
+        }
+
+        // รวมคำตอบทั้ง Page 1 และ Page 3 ส่งเข้า SheetDB
         function submitFinalData(nextPageId) {
             const messageInput = document.getElementById('user-message').value.trim();
             const finalMessage = messageInput !== "" ? messageInput : "-";
+
+            let combinedAnswer = "Page 1: " + page1Answer;
+            if (page3Answer !== "-") {
+                combinedAnswer += " | Page 3: " + page3Answer;
+            }
 
             goToPage(nextPageId);
 
@@ -155,7 +169,7 @@
                 body: JSON.stringify({
                     data: {
                         "name": savedName,
-                        "answer": savedAnswer,
+                        "answer": combinedAnswer,
                         "message": finalMessage,
                         "timestamp": new Date().toLocaleString('en-US')
                     }
@@ -163,7 +177,6 @@
             }).catch(err => console.error("Error:", err));
         }
 
-        // Handle page navigation
         function goToPage(pageId) {
             const pages = document.querySelectorAll('.card');
             pages.forEach(page => page.classList.add('hidden'));
@@ -177,12 +190,12 @@
             }
         }
 
-        // Reset inputs and state
         function resetApp() {
             document.getElementById('user-name').value = "";
             document.getElementById('user-message').value = "";
             savedName = "";
-            savedAnswer = "";
+            page1Answer = "-";
+            page3Answer = "-";
             goToPage('start');
         }
     </script>
