@@ -54,25 +54,6 @@
         .btn-no { background-color: #a4b0be; z-index: 10; }
         .btn-next { background-color: #70a1ff; }
         .hidden { display: none !important; }
-        
-        /* Music Control Button */
-        .music-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #ffb6c1;
-            color: #ff6b81;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
 
         .custom-input {
             width: 85%;
@@ -95,16 +76,6 @@
     </style>
 </head>
 <body>
-
-    <!-- Background Music (Royalty Free Cute BGM) -->
-    <audio id="bg-music" loop preload="auto">
-        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- Music Control Button -->
-    <button class="music-btn" onclick="toggleMusic()">
-        <span id="music-icon">🎵</span> <span id="music-text">Music Off</span>
-    </button>
 
     <!-- Page Start (Enter Name) -->
     <div id="page-start" class="card">
@@ -173,38 +144,16 @@
         </div>
     </div>
 
-    <!-- Page End -->
-    <div id="page-end" class="card hidden">
-        <img src="/bear.png" alt="Bear" class="card-img">
-        <h1>Ok, Thank you</h1>
-    </div>
-
     <script>
-        const youtubeVideoId = "irCD8WvvS88"; // ใส่ Video ID ของ YouTube ที่ต้องการ
-    
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
+        // ลิงก์ YouTube เพลงที่จะพาไปเมื่อเขากด No
+        const youtubeSongUrl = "https://youtu.be/W8a4sUabCUo?si=XhKi_iUOyhJ0eZun"; 
+
         let savedName = "";
         let page1Answer = "-";
         let page3Answer = "-";
         let yesScale = 1.0;
-        let noAttemptCount = 0; // ตัวนับจำนวนครั้งที่พยายามกด No
-
-        // Music toggle
-        const bgMusic = document.getElementById('bg-music');
-        let isPlaying = false;
-
-        function toggleMusic() {
-            if (isPlaying) {
-                bgMusic.pause();
-                document.getElementById('music-text').innerText = "Music Off";
-                document.getElementById('music-icon').innerText = "🔇";
-            } else {
-                bgMusic.play().catch(e => console.log("Music play blocked:", e));
-                document.getElementById('music-text').innerText = "Music On";
-                document.getElementById('music-icon').innerText = "🎵";
-            }
-            isPlaying = !isPlaying;
-        }
+        let noAttemptCount = 0;
 
         function startSurvey() {
             const nameInput = document.getElementById('user-name').value.trim();
@@ -213,17 +162,11 @@
                 return;
             }
             savedName = nameInput;
-            
-            if (!isPlaying) {
-                toggleMusic();
-            }
-            
             goToPage('1');
         }
 
         // จัดการเมื่อเลื่อนเมาส์/แตะโดนปุ่ม No
         function handleNoHover(btn, yesBtnId) {
-            // หนีเฉพาะ 2 ครั้งแรกเท่านั้น
             if (noAttemptCount < 2) {
                 moveNoBtn(btn, yesBtnId);
             }
@@ -232,14 +175,12 @@
         // จัดการเมื่อคลิกปุ่ม No
         function handleNoClick(btn, yesBtnId, callbackName) {
             if (noAttemptCount < 2) {
-                // ครั้งที่ 1 และ 2 จะหนี
                 moveNoBtn(btn, yesBtnId);
             } else {
-                // ครั้งที่ 3 เป็นต้นไปให้ยอมให้กด No ได้เลย
                 if (callbackName === 'answerPage1') {
-                    answerPage1('No', 'end');
+                    answerPage1('No', 'redirect');
                 } else if (callbackName === 'answerPage3') {
-                    answerPage3('No', 'end');
+                    answerPage3('No', 'redirect');
                 }
             }
         }
@@ -261,21 +202,19 @@
                 btn.style.left = randomX + "px";
                 btn.style.top = randomY + "px";
 
-                // ขยายปุ่ม Yes
                 yesScale += 0.2;
                 const yesBtn = document.getElementById(yesBtnId);
                 if (yesBtn) {
                     yesBtn.style.transform = `scale(${yesScale})`;
                 }
             } else {
-                // พอกด/โดนครั้งที่ 3 ย้ายปุ่มกลับมาตำแหน่งเดิมให้กดง่ายๆ
                 btn.style.position = "static";
             }
         }
 
         function resetRunawayButtons() {
             yesScale = 1.0;
-            noAttemptCount = 0; // รีเซ็ตตัวนับ
+            noAttemptCount = 0;
             ['p1-no', 'p3-no'].forEach(id => {
                 const btn = document.getElementById(id);
                 if (btn) {
@@ -293,8 +232,8 @@
         function answerPage1(ans, nextPageId) {
             page1Answer = ans;
             resetRunawayButtons();
-            if (nextPageId === 'end') {
-                submitFinalData('end');
+            if (nextPageId === 'redirect') {
+                submitAndRedirect('No');
             } else {
                 goToPage(nextPageId);
             }
@@ -303,11 +242,38 @@
         function answerPage3(ans, nextPageId) {
             page3Answer = ans;
             resetRunawayButtons();
-            if (nextPageId === 'end') {
-                submitFinalData('end');
+            if (nextPageId === 'redirect') {
+                submitAndRedirect('No');
             } else {
                 goToPage(nextPageId);
             }
+        }
+
+        function submitAndRedirect(ans) {
+            let combinedAnswer = "Page 1: " + page1Answer;
+            if (page3Answer !== "-") {
+                combinedAnswer += " | Page 3: " + page3Answer;
+            }
+
+            // ส่งข้อมูลบันทึกเข้า SheetDB ก่อนเปลี่ยนหน้า
+            fetch(SHEETDB_URL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: {
+                        "name": savedName,
+                        "answer": combinedAnswer,
+                        "message": "User selected NO -> Redirected to YouTube",
+                        "timestamp": "'" + new Date().toLocaleString('en-US')
+                    }
+                })
+            }).finally(() => {
+                // พาย้ายหน้าไปยังลิงก์ YouTube ทันที
+                window.location.href = youtubeSongUrl;
+            });
         }
 
         function submitFinalData(nextPageId) {
