@@ -23,18 +23,17 @@
         <h1>Do you like me?</h1>
         <p>Page 1</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="goToPage(2)">Yes</button>
-            <!-- กด No จะวิ่งไปแสดงหน้า Ok Thank you (Page 2) -->
-            <button class="btn-no" onclick="goToPage(2)">No</button>
+            <button class="btn-yes" onclick="goToPage('2')">Yes</button>
+            <!-- กด No ไปหน้าจบทันที (ไม่มีปุ่ม Next) -->
+            <button class="btn-no" onclick="goToPage('end')">No</button>
         </div>
     </div>
 
-    <!-- Page 2 -->
+    <!-- Page 2 (เมื่อกด Yes จากหน้า 1) -->
     <div id="page-2" class="card hidden">
-        <h1>Ok Thank you</h1>
-        <p>I'm grateful as well</p>
+        <h1>I'm grateful as well</h1>
         <div class="btn-group">
-            <button class="btn-next" onclick="goToPage(3)">Next</button>
+            <button class="btn-next" onclick="goToPage('3')">Next</button>
         </div>
     </div>
 
@@ -43,32 +42,34 @@
         <h1>Page 3</h1>
         <p>Will you be my girlfriend?</p>
         <div class="btn-group">
-            <!-- กด Yes จะไปหน้าตอบรับ (Page 4) -->
-            <button class="btn-yes" onclick="goToPage(4)">Yes</button>
-            <!-- กด No จะวนกลับไปหน้า Ok Thank you (Page 2) -->
-            <button class="btn-no" onclick="goToPage(2)">No</button>
+            <button class="btn-yes" onclick="goToPage('4')">Yes</button>
+            <!-- กด No ไปหน้าจบทันที (ไม่มีปุ่ม Next) -->
+            <button class="btn-no" onclick="goToPage('end')">No</button>
         </div>
     </div>
 
-    <!-- Page 4 (หน้าปลายทางเมื่อกด Yes ในหน้า 3) -->
+    <!-- Page 4 (เมื่อกด Yes จากหน้า 3) -->
     <div id="page-4" class="card hidden">
         <h1>Yay! ❤️</h1>
         <p>See you soon!</p>
         <div class="btn-group">
-            <button class="btn-next" onclick="goToPage(1)">Back to Start</button>
+            <button class="btn-next" onclick="goToPage('1')">Back to Start</button>
         </div>
     </div>
 
-    <script>
-        function goToPage(pageNumber) {
-            // ซ่อนทุกหน้า
-            document.getElementById('page-1').classList.add('hidden');
-            document.getElementById('page-2').classList.add('hidden');
-            document.getElementById('page-3').classList.add('hidden');
-            document.getElementById('page-4').classList.add('hidden');
+    <!-- Page End (หน้าแสดงเมื่อกด No จะไม่มีปุ่ม Next ให้ไปต่อ) -->
+    <div id="page-end" class="card hidden">
+        <h1>Ok Thank you</h1>
+    </div>
 
-            // แสดงหน้าที่ต้องการ
-            document.getElementById('page-' + pageNumber).classList.remove('hidden');
+    <script>
+        function goToPage(pageId) {
+            // ซ่อนทุกหน้า
+            const pages = document.querySelectorAll('.card');
+            pages.forEach(page => page.classList.add('hidden'));
+
+            // แสดงเฉพาะหน้าที่เลือก
+            document.getElementById('page-' + pageId).classList.remove('hidden');
         }
     </script>
 </body>
