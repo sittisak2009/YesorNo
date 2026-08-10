@@ -3,16 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Flask Web App</title>
+    <title>Do you like me?</title>
     <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f4f9; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; min-width: 300px; }
-        .btn-group { margin-top: 1.5rem; display: flex; justify-content: center; gap: 10px; }
-        button { padding: 10px 20px; font-size: 16px; border: none; border-radius: 6px; cursor: pointer; color: white; transition: opacity 0.2s; }
-        .btn-yes { background-color: #4CAF50; }
-        .btn-no { background-color: #f44336; }
-        .btn-next { background-color: #2196F3; }
-        button:hover { opacity: 0.8; }
+        * {
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffeef2; /* ปรับพื้นหลังเป็นสีชมพูอ่อน */
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            min-width: 320px;
+            max-width: 400px;
+        }
+        /* CSS สำหรับจัดการขนาดรูปภาพ */
+        .card-img {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+        }
+        .btn-group {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        button {
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+        .btn-yes { background-color: #ff6b81; }
+        .btn-no { background-color: #a4b0be; }
+        .btn-next { background-color: #70a1ff; }
         .hidden { display: none; }
     </style>
 </head>
@@ -20,17 +64,19 @@
 
     <!-- Page 1 -->
     <div id="page-1" class="card">
+        <!-- ใส่รูปภาพตรงนี้ -->
+        <img src="images/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
         <p>Page 1</p>
         <div class="btn-group">
             <button class="btn-yes" onclick="goToPage('2')">Yes</button>
-            <!-- กด No ไปหน้าจบทันที (ไม่มีปุ่ม Next) -->
             <button class="btn-no" onclick="goToPage('end')">No</button>
         </div>
     </div>
 
     <!-- Page 2 (เมื่อกด Yes จากหน้า 1) -->
     <div id="page-2" class="card hidden">
+        <img src="images/happy.png" alt="Happy" class="card-img">
         <h1>I'm grateful as well</h1>
         <div class="btn-group">
             <button class="btn-next" onclick="goToPage('3')">Next</button>
@@ -39,17 +85,18 @@
 
     <!-- Page 3 -->
     <div id="page-3" class="card hidden">
-        <h1>Will you be my girlfriend?</h1>
-        <p>Page 3</p>
+        <img src="images/flower.gif" alt="Flower" class="card-img">
+        <h1>Page 3</h1>
+        <p>Will you be my girlfriend?</p>
         <div class="btn-group">
             <button class="btn-yes" onclick="goToPage('4')">Yes</button>
-            <!-- กด No ไปหน้าจบทันที (ไม่มีปุ่ม Next) -->
             <button class="btn-no" onclick="goToPage('end')">No</button>
         </div>
     </div>
 
     <!-- Page 4 (เมื่อกด Yes จากหน้า 3) -->
     <div id="page-4" class="card hidden">
+        <img src="images/love.gif" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
         <p>See you soon!</p>
         <div class="btn-group">
@@ -57,20 +104,19 @@
         </div>
     </div>
 
-    <!-- Page End (หน้าแสดงเมื่อกด No จะไม่มีปุ่ม Next ให้ไปต่อ) -->
+    <!-- Page End (เมื่อกด No) -->
     <div id="page-end" class="card hidden">
+        <img src="images/bear.png" alt="Bye" class="card-img">
         <h1>Ok Thank you</h1>
     </div>
 
     <script>
         function goToPage(pageId) {
-            // ซ่อนทุกหน้า
             const pages = document.querySelectorAll('.card');
             pages.forEach(page => page.classList.add('hidden'));
-
-            // แสดงเฉพาะหน้าที่เลือก
             document.getElementById('page-' + pageId).classList.remove('hidden');
         }
     </script>
 </body>
-</html>
+                </html>
+            
