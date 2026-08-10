@@ -63,7 +63,7 @@
 
     <!-- Page 1 -->
     <div id="page-1" class="card">
-        <img src="{{ url_for('static', filename='panda.GIF') }}" alt="Panda" class="card-img">
+        <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
         <p>Page 1</p>
         <div class="btn-group">
@@ -74,7 +74,7 @@
 
     <!-- Page 2 (เมื่อกด Yes จากหน้า 1) -->
     <div id="page-2" class="card hidden">
-        <img src="{{ url_for('static', filename='happy.PNG') }}" alt="Happy" class="card-img">
+        <img src="/happy.png" alt="Happy" class="card-img">
         <h1>I'm grateful as well</h1>
         <div class="btn-group">
             <button class="btn-next" onclick="goToPage('3')">Next</button>
@@ -83,7 +83,7 @@
 
     <!-- Page 3 -->
     <div id="page-3" class="card hidden">
-        <img src="{{ url_for('static', filename='flower.GIF') }}" alt="Flower" class="card-img">
+        <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Page 3</h1>
         <p>Will you be my girlfriend?</p>
         <div class="btn-group">
@@ -94,7 +94,7 @@
 
     <!-- Page 4 (เมื่อกด Yes จากหน้า 3) -->
     <div id="page-4" class="card hidden">
-        <img src="{{ url_for('static', filename='happy.PNG') }}" alt="Love" class="card-img">
+        <img src="/happy.png" alt="Love" class="card-img">
         <h1>Yay! ❤️</h1>
         <p>See you soon!</p>
         <div class="btn-group">
@@ -104,7 +104,7 @@
 
     <!-- Page End (เมื่อกด No) -->
     <div id="page-end" class="card hidden">
-        <img src="{{ url_for('static', filename='bear.PNG') }}" alt="Bear" class="card-img">
+        <img src="/bear.png" alt="Bear" class="card-img">
         <h1>Ok Thank you</h1>
     </div>
 
