@@ -4,19 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Do you like me?</title>
+    <!-- JS Canvas Confetti library for fireworks -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        * { box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #ffeef2; }
-        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; min-width: 320px; max-width: 400px; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: #ffeef2; 
+            overflow: hidden;
+            position: relative;
+        }
+        .card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+            text-align: center; 
+            min-width: 320px; 
+            max-width: 400px; 
+            position: relative;
+            z-index: 2;
+        }
         .card-img { width: 180px; height: 180px; object-fit: contain; margin-bottom: 1rem; border-radius: 12px; }
-        .btn-group { margin-top: 1.5rem; display: flex; justify-content: center; gap: 12px; }
-        button { padding: 10px 24px; font-size: 16px; font-weight: bold; border: none; border-radius: 25px; cursor: pointer; color: white; transition: transform 0.2s, opacity 0.2s; }
+        .btn-group { 
+            margin-top: 1.5rem; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            gap: 12px; 
+            min-height: 50px;
+            position: relative;
+        }
+        button { 
+            padding: 10px 24px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            color: white; 
+            transition: transform 0.2s, opacity 0.2s, background-color 0.2s; 
+        }
         button:hover { transform: scale(1.05); opacity: 0.9; }
-        .btn-yes { background-color: #ff6b81; }
-        .btn-no { background-color: #a4b0be; }
+        .btn-yes { background-color: #ff6b81; z-index: 2; }
+        .btn-no { background-color: #a4b0be; z-index: 10; }
         .btn-next { background-color: #70a1ff; }
-        .hidden { display: none; }
+        .hidden { display: none !important; }
         
+        /* Music Control Button */
+        .music-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ffb6c1;
+            color: #ff6b81;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         .custom-input {
             width: 85%;
             padding: 12px 15px;
@@ -39,6 +96,16 @@
 </head>
 <body>
 
+    <!-- Background Music (Royalty Free Cute BGM) -->
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=cute-creepy-music-box-113222.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Music Control Button -->
+    <button class="music-btn" onclick="toggleMusic()">
+        <span id="music-icon">🎵</span> <span id="music-text">Music Off</span>
+    </button>
+
     <!-- Page Start (Enter Name) -->
     <div id="page-start" class="card">
         <img src="/panda.gif" alt="Panda" class="card-img">
@@ -58,8 +125,8 @@
         <h1>Do you like me?</h1>
         <p>Website by Fluke</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="answerPage1('Yes', '2')">Yes</button>
-            <button class="btn-no" onclick="answerPage1('No', 'end')">No</button>
+            <button id="p1-yes" class="btn-yes" onclick="answerPage1('Yes', '2')">Yes</button>
+            <button id="p1-no" class="btn-no" onmouseover="handleNoHover(this, 'p1-yes')" onclick="handleNoClick(this, 'p1-yes', 'answerPage1')">No</button>
         </div>
     </div>
 
@@ -78,8 +145,8 @@
         <h1>Will you be my girlfriend?</h1>
         <p>Website by Fluke</p>
         <div class="btn-group">
-            <button class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
-            <button class="btn-no" onclick="answerPage3('No', 'end')">No</button>
+            <button id="p3-yes" class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
+            <button id="p3-no" class="btn-no" onmouseover="handleNoHover(this, 'p3-yes')" onclick="handleNoClick(this, 'p3-yes', 'answerPage3')">No</button>
         </div>
     </div>
 
@@ -117,6 +184,25 @@
         let savedName = "";
         let page1Answer = "-";
         let page3Answer = "-";
+        let yesScale = 1.0;
+        let noAttemptCount = 0; // ตัวนับจำนวนครั้งที่พยายามกด No
+
+        // Music toggle
+        const bgMusic = document.getElementById('bg-music');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                bgMusic.pause();
+                document.getElementById('music-text').innerText = "Music Off";
+                document.getElementById('music-icon').innerText = "🔇";
+            } else {
+                bgMusic.play().catch(e => console.log("Music play blocked:", e));
+                document.getElementById('music-text').innerText = "Music On";
+                document.getElementById('music-icon').innerText = "🎵";
+            }
+            isPlaying = !isPlaying;
+        }
 
         function startSurvey() {
             const nameInput = document.getElementById('user-name').value.trim();
@@ -125,12 +211,86 @@
                 return;
             }
             savedName = nameInput;
+            
+            if (!isPlaying) {
+                toggleMusic();
+            }
+            
             goToPage('1');
         }
 
-        // เก็บคำตอบของ Page 1
+        // จัดการเมื่อเลื่อนเมาส์/แตะโดนปุ่ม No
+        function handleNoHover(btn, yesBtnId) {
+            // หนีเฉพาะ 2 ครั้งแรกเท่านั้น
+            if (noAttemptCount < 2) {
+                moveNoBtn(btn, yesBtnId);
+            }
+        }
+
+        // จัดการเมื่อคลิกปุ่ม No
+        function handleNoClick(btn, yesBtnId, callbackName) {
+            if (noAttemptCount < 2) {
+                // ครั้งที่ 1 และ 2 จะหนี
+                moveNoBtn(btn, yesBtnId);
+            } else {
+                // ครั้งที่ 3 เป็นต้นไปให้ยอมให้กด No ได้เลย
+                if (callbackName === 'answerPage1') {
+                    answerPage1('No', 'end');
+                } else if (callbackName === 'answerPage3') {
+                    answerPage3('No', 'end');
+                }
+            }
+        }
+
+        // ย้ายตำแหน่งปุ่ม No
+        function moveNoBtn(btn, yesBtnId) {
+            noAttemptCount++;
+            
+            if (noAttemptCount < 3) {
+                btn.style.position = "fixed";
+                
+                const padding = 50;
+                const maxX = window.innerWidth - btn.offsetWidth - padding;
+                const maxY = window.innerHeight - btn.offsetHeight - padding;
+
+                const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
+                const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
+
+                btn.style.left = randomX + "px";
+                btn.style.top = randomY + "px";
+
+                // ขยายปุ่ม Yes
+                yesScale += 0.2;
+                const yesBtn = document.getElementById(yesBtnId);
+                if (yesBtn) {
+                    yesBtn.style.transform = `scale(${yesScale})`;
+                }
+            } else {
+                // พอกด/โดนครั้งที่ 3 ย้ายปุ่มกลับมาตำแหน่งเดิมให้กดง่ายๆ
+                btn.style.position = "static";
+            }
+        }
+
+        function resetRunawayButtons() {
+            yesScale = 1.0;
+            noAttemptCount = 0; // รีเซ็ตตัวนับ
+            ['p1-no', 'p3-no'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.style.position = "static";
+                }
+            });
+            ['p1-yes', 'p3-yes'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.style.transform = "scale(1.0)";
+                }
+            });
+        }
+
         function answerPage1(ans, nextPageId) {
             page1Answer = ans;
+            resetRunawayButtons();
             if (nextPageId === 'end') {
                 submitFinalData('end');
             } else {
@@ -138,9 +298,9 @@
             }
         }
 
-        // เก็บคำตอบของ Page 3
         function answerPage3(ans, nextPageId) {
             page3Answer = ans;
+            resetRunawayButtons();
             if (nextPageId === 'end') {
                 submitFinalData('end');
             } else {
@@ -148,7 +308,6 @@
             }
         }
 
-        // รวมคำตอบทั้ง Page 1 และ Page 3 ส่งเข้า SheetDB
         function submitFinalData(nextPageId) {
             const messageInput = document.getElementById('user-message').value.trim();
             const finalMessage = messageInput !== "" ? messageInput : "-";
@@ -159,6 +318,10 @@
             }
 
             goToPage(nextPageId);
+
+            if (nextPageId === '4') {
+                launchConfetti();
+            }
 
             fetch(SHEETDB_URL, {
                 method: 'POST',
@@ -171,10 +334,36 @@
                         "name": savedName,
                         "answer": combinedAnswer,
                         "message": finalMessage,
-                        "timestamp": new Date().toLocaleString('en-US')
+                        "timestamp": "'" + new Date().toLocaleString('en-US')
                     }
                 })
             }).catch(err => console.error("Error:", err));
+        }
+
+        function launchConfetti() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#ff6b81', '#ffb6c1', '#ffffff', '#ff4757']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#ff6b81', '#ffb6c1', '#ffffff', '#ff4757']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
         }
 
         function goToPage(pageId) {
@@ -196,6 +385,7 @@
             savedName = "";
             page1Answer = "-";
             page3Answer = "-";
+            resetRunawayButtons();
             goToPage('start');
         }
     </script>
