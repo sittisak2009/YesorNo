@@ -73,22 +73,9 @@
         .custom-input:focus {
             border-color: #ff6b81;
         }
-
-        /* ซ่อนตัวเล่นเพลง YouTube ไว้เบื้องหลัง */
-        #bg-music-container {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
     </style>
 </head>
 <body>
-
-    <!-- ซ่อนเครื่องเล่นเพลง YouTube ไว้หลังเว็บ -->
-    <div id="bg-music-container"></div>
 
     <!-- Page Start (Enter Name) -->
     <div id="page-start" class="card">
@@ -103,7 +90,7 @@
         </div>
     </div>
 
-    <!-- Page 1: Do you like me? -->
+    <!-- Page 1: Do you like me? (ปุ่ม No ยังขยับหนีอยู่) -->
     <div id="page-1" class="card hidden">
         <img src="/panda.gif" alt="Panda" class="card-img">
         <h1>Do you like me?</h1>
@@ -123,14 +110,14 @@
         </div>
     </div>
 
-    <!-- Page 3: Will you be my girlfriend? -->
+    <!-- Page 3: Will you be my girlfriend? (ปุ่ม No นิ่งๆ ไม่หนี) -->
     <div id="page-3" class="card hidden">
         <img src="/flower.gif" alt="Flower" class="card-img">
         <h1>Will you be my girlfriend?</h1>
         <p>Website by Fluke</p>
         <div class="btn-group">
             <button id="p3-yes" class="btn-yes" onclick="answerPage3('Yes', 'message')">Yes</button>
-            <button id="p3-no" class="btn-no" onclick="answerPage3('No', 'message')">No</button>
+            <button id="p3-no" class="btn-no" onclick="answerPage3('No', 'redirect')">No</button>
         </div>
     </div>
 
@@ -159,8 +146,8 @@
 
     <script>
         const SHEETDB_URL = "https://sheetdb.io/api/v1/djep3pyy8c55t";
-        // YouTube Video ID (ตัวอย่างรหัสหลัง v= ของลิงก์ YouTube เช่น irCD8WvvS88)
-        const youtubeVideoId = "iUOyhJ0eZun"; 
+        // ลิงก์ YouTube เพลงที่จะพาไปเมื่อเขากด No ในหน้าขอเป็นแฟน
+        const youtubeSongUrl = "https://youtu.be/W8a4sUabCUo?si=XhKi_iUOyhJ0eZun"; 
 
         let savedName = "";
         let page1Answer = "-";
@@ -242,19 +229,37 @@
 
         function answerPage3(ans, nextPageId) {
             page3Answer = ans;
-            if (ans === 'No') {
-                // แจ้งเตือนข้อความภาษาอังกฤษ
+            if (nextPageId === 'redirect') {
+                // แสดงป๊อปอัปบอกก่อนย้ายหน้า
                 alert("I'd like you to listen to this song.");
-                // เริ่มเล่นเพลง YouTube ในพื้นหลัง
-                playBackgroundYouTube();
+                submitAndRedirect();
+            } else {
+                goToPage(nextPageId);
             }
-            goToPage(nextPageId);
         }
 
-        function playBackgroundYouTube() {
-            const container = document.getElementById('bg-music-container');
-            // สร้าง iframe ของ YouTube ให้เล่นอัตโนมัติ (autoplay=1)
-            container.innerHTML = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        function submitAndRedirect() {
+            let combinedAnswer = "Page 1: " + page1Answer + " | Page 3: No";
+
+            // บันทึกคำตอบลง SheetDB ก่อนย้ายหน้า
+            fetch(SHEETDB_URL, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: {
+                        "name": savedName,
+                        "answer": combinedAnswer,
+                        "message": "Rejected gf request -> Redirected to YouTube",
+                        "timestamp": "'" + new Date().toLocaleString('en-US')
+                    }
+                })
+            }).finally(() => {
+                // ย้ายหน้าไปยัง YouTube ทันที
+                window.location.href = youtubeSongUrl;
+            });
         }
 
         function submitFinalData(nextPageId) {
@@ -328,7 +333,6 @@
         function resetApp() {
             document.getElementById('user-name').value = "";
             document.getElementById('user-message').value = "";
-            document.getElementById('bg-music-container').innerHTML = ""; // หยุดเพลงเมื่อเริ่มใหม่
             savedName = "";
             page1Answer = "-";
             page3Answer = "-";
@@ -337,4 +341,5 @@
         }
     </script>
 </body>
-</html>
+    </html>
+            
