@@ -12,10 +12,10 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
+            min-height: 100vh; 
             margin: 0; 
             background-color: #ffeef2; 
-            overflow: hidden;
+            overflow-x: hidden;
             position: relative;
         }
         .card { 
@@ -25,9 +25,10 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
             text-align: center; 
             min-width: 320px; 
-            max-width: 400px; 
+            max-width: 420px; 
             position: relative;
             z-index: 2;
+            margin: 20px;
         }
         .card-img { width: 180px; height: 180px; object-fit: contain; margin-bottom: 1rem; border-radius: 12px; }
         .btn-group { 
@@ -72,6 +73,32 @@
         }
         .custom-input:focus {
             border-color: #ff6b81;
+        }
+
+        /* สไตล์สำหรับการ์ดความในใจยาวๆ */
+        .letter-card {
+            max-height: 80vh;
+            overflow-y: auto;
+            text-align: left;
+            padding: 2.5rem 2rem;
+            border: 2px solid #ffccd5;
+            background: #fffafa;
+        }
+        .letter-title {
+            text-align: center;
+            color: #ff4757;
+            margin-bottom: 1.5rem;
+        }
+        .letter-content {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #4a4a4a;
+            white-space: pre-line;
+            background: #ffffff;
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid #ffe4e8;
+            box-shadow: inset 0 0 10px rgba(255, 182, 193, 0.1);
         }
     </style>
 </head>
@@ -130,7 +157,28 @@
         <textarea id="user-message" class="custom-input" placeholder="Type your message here... (optional)"></textarea>
         
         <div class="btn-group">
-            <button class="btn-yes" onclick="submitFinalData('4')">Send Message</button>
+            <button class="btn-yes" onclick="submitFinalData('letter')">Send Message</button>
+        </div>
+    </div>
+
+    <!-- Page Heartfelt Letter (การ์ดความในใจยาวๆ) -->
+    <div id="page-letter" class="card letter-card hidden">
+        <h1 class="letter-title">A Special Letter For You 💌</h1>
+        
+        <div class="letter-content">
+To <span id="letter-recipient-name" style="font-weight: bold; color: #ff6b81;"></span>,
+
+ขอบคุณมากๆ เลยนะที่เปิดเข้ามาเล่นเว็บนี้จนถึงหน้าสุดท้าย 
+
+อยากจะบอกว่าทุกๆ ข้อความและทุกๆ หน้าในเว็บนี้ ตั้งใจทำขึ้นมาให้เธอโดยเฉพาะเลยนะ อาจจะไม่ได้สมบูรณ์แบบที่สุด แต่มันมาจากใจจริงๆ 
+
+ขอบคุณสำหรับคำตอบ และขอบคุณที่เข้ามาเป็นเรื่องราวดีๆ และเป็นรอยยิ้มในทุกๆ วันนะ ต่อจากนี้ไป ไม่ว่าจะเจอเรื่องอะไร อยากให้รู้ไว้เสมอว่ายังมีเราอยู่ตรงนี้คอยซัพพอร์ต และตั้งใจจะดูแลเธอให้ดีที่สุดเลย
+
+สัญญาว่าจะทำให้เธอมีความสุขและยิ้มได้ในทุกๆ วันนะ ❤️
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-yes" onclick="goToPage('4')">Continue ❤️</button>
         </div>
     </div>
 
@@ -263,7 +311,7 @@
 
             goToPage(nextPageId);
 
-            if (nextPageId === '4') {
+            if (nextPageId === '4' || nextPageId === 'letter') {
                 launchConfetti();
             }
 
@@ -318,6 +366,9 @@
                 document.getElementById('page-start').classList.remove('hidden');
             } else if (pageId === 'message') {
                 document.getElementById('page-message').classList.remove('hidden');
+            } else if (pageId === 'letter') {
+                document.getElementById('letter-recipient-name').innerText = savedName;
+                document.getElementById('page-letter').classList.remove('hidden');
             } else {
                 document.getElementById('page-' + pageId).classList.remove('hidden');
             }
@@ -334,5 +385,5 @@
         }
     </script>
 </body>
-        </html>
-                                                                                         
+    </html>
+                
